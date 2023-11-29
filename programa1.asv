@@ -41,7 +41,6 @@ end
 B2 = [B2; 3800 600];    % adicionar ponto final
 B2 = [0 0; B2];         % adicionar ponto inicial
 
-
 plot(B1(:,1), B1(:,2)), hold on;
 plot(B2(:,1), B2(:,2));
 plot(B3(:,1), B3(:,2));
@@ -72,10 +71,8 @@ Nnds = length(coordx);
 % inicializacao
 Kg=zeros(Nnds,Nnds);
 fg=zeros(Nnds,1);
-U = 2.5;
-bom=10^12;
-
-
+U = 2.5/1000;
+boom = 10^12;
 
 % Carregamento no elemento
 for i=1:Nels
@@ -90,37 +87,25 @@ for i=1:Nels
     Kg(edofs,edofs)= Kg(edofs,edofs) + Ke;
     fg(edofs,1)= fg(edofs,1) + fe;
 end
-% B2 stream function is zero
-for i = 1:size(B2, 1)
-    j = find(coordx == B2(i, 1) & coordy == B2(i, 2)); % Find the corresponding node
-    %Kg(j, :) = 0;
-    Kg(j, j) = 1*bom;
-    fg(j) = 0; % stream function = 0
-end
+
 % B1
 for i = 1:size(B1)
     j = find(coordx == B1(i, 1) & coordy == B1(i, 2));
-    % Kg(j, :) = 0;
-    Kg(j, j) = bom*1;
-    fg(j) = bom*coordy(j)*U; % stream function = yU
+    Kg(j, j) = boom*1;
+    fg(j) = boom*coordy(j)*U; % stream function = yU
 end
-
-% B4  - é igual ao B2 ?
+% B2
+for i = 1:size(B2, 1)
+    j = find(coordx == B2(i, 1) & coordy == B2(i, 2)); % Find the corresponding node
+    Kg(j, j) = 1*boom;
+    fg(j) = 0; % stream function = 0
+end
+% B4
 for i = 1:size(B1)
     j = find(coordx == B1(i, 1) & coordy == B1(i, 2));
-    %Kg(j, :) = 0;
-    Kg(j, j) = bom*1;
-    fg(j) = bom*coordy(j)*U; % stream function = yU
+    Kg(j, j) = boom*1;
+    fg(j) = boom*coordy(j)*U; % stream function = yU
 end
-
-
-% B3 derivada da função corrente é 0
-
-
-
-
-
-
 
 % % Carregamento no elemento
 % for i=1:Nels
