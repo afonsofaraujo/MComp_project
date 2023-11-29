@@ -1,6 +1,6 @@
 %FORMATACAO
 format long
-clear all
+clear
 %% Extract connectivity from NX txt
 fileID0 = fopen('Elementscomsimetria.txt','r');
 formatSpec = '%c'; '%d'; %repetido 
