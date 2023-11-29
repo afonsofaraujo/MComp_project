@@ -55,4 +55,4 @@ end
 % fronteira=[coordx(k),coordy(k)];
 % plot(fronteira(:,1),fronteira(:,2))
 
-
+disp('dados carregados')
