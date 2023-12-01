@@ -4,41 +4,22 @@ close all; clear; clc
 disp('Data loaded...');
 coordx = coordout(:,2);
 coordy = coordout(:,3);
-k = boundary(coordx,coordy,0.85);
-fronteira = [coordx(k),coordy(k)];
-ymax = max(fronteira(:,2));
-xmax = max(fronteira(:,1));
-xmin = min(fronteira(:,1));
-B1 = [];    % esquerda
-B2 = [];    % baixo
-B3 = [];    % direita
-B4 = [];    % cima
-s = []; % índices já utilizados
-for i = 1:size(fronteira,1)
-    if fronteira(i,2) == ymax
-        B4 = [B4; fronteira(i,:)];
-        s = [s;i];
-    end
-    if fronteira(i,1) == xmin
-        B1 = [B1; fronteira(i,:)];
-        s = [s;i];
-    end
-    if fronteira(i,1) == xmax
-        B3 = [B3; fronteira(i,:)];
-        s = [s;i];
-    end
-end
-s = unique(s);  % retirar índices repetidos (cantos)
-for i = 1:size(fronteira,1)
-    if ~ismember(i,s)
-        B2 = [B2; fronteira(i,:)]; % B2 contém os pontos da fronteira não utilizados
-    end
-end
-B2 = [B2; xmax min(B3(:,2))];   % adicionar ponto final 
-B2 = [0 0; B2];                 % adicionar ponto inicial
+k = boundary(coordx, coordy, 0.85);
+fronteira = [coordx(k), coordy(k)];
+ymax = max(fronteira(:, 2));
+xmax = max(fronteira(:, 1));
+xmin = min(fronteira(:, 1));
+B4 = fronteira(fronteira(:, 2) == ymax, :);
+B1 = fronteira(fronteira(:, 1) == xmin, :);
+B3 = fronteira(fronteira(:, 1) == xmax, :);
+s = unique([find(fronteira(:, 2) == ymax); find(fronteira(:, 1) == xmin); find(fronteira(:, 1) == xmax)]);
+B2 = fronteira(~ismember(1:size(fronteira, 1), s), :);
+B2 = [0 0; B2; xmax min(B3(:, 2))];
 disp('Assembly...');
 Nels = size(connectivityData, 1);
 Nnds = length(coordx);
+% Kg = sparse(length(coordout),length(coordout)); % inicialização
+% fg = sparse(length(coordout),1);
 Kg = zeros(Nnds,Nnds); % inicialização
 fg = zeros(Nnds,1);
 U = 2.5*1000;   % velocidade de entrada em mm/s (porque a malha está em mm)
@@ -51,6 +32,17 @@ for i=1:Nels    % Carregamento no elemento
     Kg(edofs,edofs)= Kg(edofs,edofs) + Ke;
     fg(edofs,1)= fg(edofs,1) + fe;
 end
+% disp('Boundary conditions...');
+% j_B1 = ismember(coordx, B1(:, 1)) & ismember(coordy, B1(:, 2));
+% j_B2 = ismember(coordx, B2(:, 1)) & ismember(coordy, B2(:, 2));
+% j_B4 = ismember(coordx, B4(:, 1)) & ismember(coordy, B4(:, 2));
+% Kg(j_B1, j_B1) = boom;
+% fg(j_B1) = boom * coordy(j_B1) * U;
+% Kg(j_B2, j_B2) = boom;
+% fg(j_B2) = 0;
+% Kg(j_B4, j_B4) = boom;
+% fg(j_B4) = boom * ymax * U;
+%  
 disp('Boundary conditions...');
 for i = 1:size(B1,1)    % B1
     j = find(coordx == B1(i, 1) & coordy == B1(i, 2));
@@ -130,18 +122,25 @@ rotatedVectors = rotationMatrix * [arrow_u(:)'; arrow_v(:)'];   % Apply the rota
 u2 = reshape(rotatedVectors(1, :), size(arrow_x));    % Reshape the rotated vectors back to the original grid
 v2 = reshape(rotatedVectors(2, :), size(arrow_y));
 
+% Extract points on the left boundary
+leftBoundaryIndices = find(arrow_x == 0 & arrow_y >= 0 & arrow_y <= 900);
+
+% Interpolate the velocity field to a finer grid
+[xq, yq] = meshgrid(linspace(min(arrow_x), max(arrow_x), 100), linspace(min(arrow_y), max(arrow_y), 100));
+% scatter(xq,yq);
+uq = griddata(arrow_x, arrow_y, u2, xq, yq, 'linear');
+vq = griddata(arrow_x, arrow_y, v2, xq, yq, 'linear');
+
 figure;
-subplot(1,2,1);
-quiver(arrow_x, arrow_y, arrow_u, arrow_v); % Plot the vector field using quiver
-axis equal;
-title('u');
-
-
-subplot(1,2,2);
 quiver(arrow_x, arrow_y, u2, v2);
-axis equal;
-title('u2');
+hold on;
 
+% Plot streamlines starting only from the left boundary
+streamline(xq, yq, uq, vq, arrow_x(leftBoundaryIndices), arrow_y(leftBoundaryIndices));
+
+axis equal;
+title('u2 with Streamlines (Left Boundary)');
+hold off;
 %%%%%%%%%%%%%
 
 
@@ -261,7 +260,7 @@ title('u2');
 % title('Velocity Vector Field');
 % axis equal;
 % grid on;
-%% Plot elementos
+%% Plot elements
 
 % figure;
 % hold on;
@@ -278,9 +277,9 @@ title('u2');
 % ylabel('Y-axis');
 % title('Quad Elements Plot');
 
-%% Plot boundary
+% Plot boundary
 % plot(fronteira(:,1),fronteira(:,2));
-
+% 
 % plot(B1(:,1), B1(:,2)), hold on;
 % plot(B2(:,1), B2(:,2));
 % plot(B3(:,1), B3(:,2));
