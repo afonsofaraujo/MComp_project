@@ -1,0 +1,127 @@
+%PROGRAMA3
+close all; clear; clc
+%[coordout, connectivityData] = readNXData('Elementscasosimples.txt', 'Nodescasosimples.txt');
+%[coordout, connectivityData] = readNXData('Elementscomsimetria.txt', 'Nodescomsimetria.txt');
+
+
+fileName = 'dados-escalar.txt';
+
+[nodeCoordinates, matrixIncidences, materialProperties,... 
+distributedLoads, essentialBCs, pointLoads, imposedFlux,...
+naturalConvection] = readDadosEscalar(fileName);
+
+coordx = nodeCoordinates(:,2);
+coordy = nodeCoordinates(:,3);
+connectivityData = matrixIncidences(:, 4:7); % No futuro identificar aqui se é quad ou 8
+
+disp('Data loaded...');
+
+disp('Assembly...');
+Nels = size(connectivityData, 1);
+Nnds = length(coordx);
+Kg = zeros(Nnds,Nnds); % inicialização
+fg = zeros(Nnds,1);
+for i=1:Nels    % Carregamento no elemento
+    edofs=[connectivityData(i, :)];
+    XN(1:4,1)=coordx(edofs);
+    XN(1:4,2)=coordy(edofs);
+    [Ke, fe]=Elem_Quad4(XN,0);  % carregamento 0
+    Kg(edofs,edofs)= Kg(edofs,edofs) + Ke;
+    fg(edofs,1)= fg(edofs,1) + fe;
+end
+
+disp('Boundary conditions...');
+boom = 1.0e+14;
+for i = 1:size(essentialBCs, 1)
+    Kg(essentialBCs(i,1), essentialBCs(i,1)) = boom;
+    fg(essentialBCs(i,1)) = boom*essentialBCs(i,2);
+end
+
+for i = 1:size(imposedFlux,1)
+    gama = imposedFlux(i,4);
+    fg(imposedflux(i,2)) = fg(imposedflux(i,2)) + gama/2;
+    fg(imposedflux(i,3)) = fg(imposedflux(i,3)) + gama/2;
+end
+
+for i = 1:size(naturalConvection,1)
+    p = naturalConvection(i,4);
+    Tout
+    Kg(naturalConvection(i,2),naturalConvection(i,2)) = Kg(naturalConvection(i,2),naturalConvection(i,2)) + p/3;
+    Kg(naturalConvection(i,2),naturalConvection(i,3)) = Kg(naturalConvection(i,2),naturalConvection(i,3)) + p/6;
+    Kg(naturalConvection(i,3),naturalConvection(i,2)) = Kg(naturalConvection(i,3),naturalConvection(i,2)) + p/6;
+    Kg(naturalConvection(i,3),naturalConvection(i,3)) = Kg(naturalConvection(i,3),naturalConvection(i,3)) + p/3;
+    fg(naturalConvection(i,2)) = fg(naturalConvection(i,2)) + p * T_outside / 2;
+    fg(6) = fg(6) + p * T_outside / 2;
+end
+
+
+h = 5;  % Convective heat transfer coefficient
+T_outside = 10;  % Temperature far from the wall
+
+% Modify the stiffness matrix for the Robin boundary condition
+p = h;
+Kg(5,5) = Kg(5,5) + p/3;
+Kg(5,6) = Kg(5,6) + p/6;
+Kg(6,5) = Kg(6,5) + p/6;
+Kg(6,6) = Kg(6,6) + p/3;
+
+% Modify the right-hand side (force vector) for the Robin boundary condition
+fg(5) = fg(5) + p * T_outside / 2;
+fg(6) = fg(6) + p * T_outside / 2;
+
+p=1
+Kg(5,5) = Kg(5,5) + p/3
+Kg(5,6) = Kg(5,6) + p/6
+Kg(6,5) = Kg(6,5) + p/6
+Kg(6,6) = Kg(6,6) + p/3
+
+
+for i = 1:size(B1,1)    % B1
+    j = find(coordx == B1(i, 1) & coordy == B1(i, 2));
+    Kg(j, j) = boom;
+    fg(j) = boom*coordy(j)*U; % stream function = yU
+end
+for i = 1:size(B2,1)    % B2
+    j = find(coordx == B2(i, 1) & coordy == B2(i, 2)); % Find the corresponding node
+    Kg(j, j) = boom;
+    fg(j) = 0; % stream function = 0
+end
+for i = 1:size(B4,1)    % B4
+    j = find(coordx == B4(i, 1) & coordy == B4(i, 2));
+    Kg(j, j) = boom;
+    fg(j) = boom*ymax*U; % stream function = y_maxU
+end
+
+
+
+%% Plot elements
+% figure;
+% hold on;
+% for i = 1:Nels
+%     currentConnectivity = connectivityData(i, :);
+%     x = coordx(currentConnectivity);
+%     y = coordy(currentConnectivity);
+%     patch(x, y, 'b', 'FaceAlpha', 0.5);
+% end
+% hold off;
+% axis equal;
+% grid on;
+% xlabel('X-axis');
+% ylabel('Y-axis');
+% title('Quad Elements Plot');
+%% Plot boundary
+% plot(B1(:,1), B1(:,2)), hold on;
+% plot(B2(:,1), B2(:,2));
+% plot(B3(:,1), B3(:,2));
+% plot(B4(:,1), B4(:,2)); 
+% legend(["B1","B2","B3","B4"]);
+% hold off;
+%% Plot solution
+% figure
+% for i=1:Nels
+% edofs=[connectivityData(i,:)];
+% fill3 (coordx(edofs),coordy(edofs),u(edofs),u(edofs));hold on
+% plot(coordx(edofs),coordy(edofs),'r');hold on
+% end
+% plot(coordx,coordy,'ro');
+% hold off;

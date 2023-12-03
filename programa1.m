@@ -91,55 +91,13 @@ for i = 1:Nels
     end
 end
 
-% % Calculate pressure at each element
-% pressure = zeros(Nels, 1);
-% for i = 1:Nels
-%     edofs = connectivityData(i,:);
-% 
-%     % Ensure edofs indices are within the range of the pressure array
-%     validIndices = edofs <= numel(pressure) & edofs > 0;
-%     edofs = edofs(validIndices);
-% 
-%     XN(1:4,1) = coordx(edofs);
-%     XN(1:4,2) = coordy(edofs);
-%     csi = 0;
-%     eta = 0;
-%     nip = 4;
-%     [xp, wp] = Genip2DQ(nip);
-%     for ip = 1:nip
-%         csi = xp(ip,1);
-%         eta = xp(ip,2);
-%         [~, psi, Detj] = Shape_N_Der4(XN, csi, eta);
-% 
-%         % Calculate pressure at the valid indices
-%         pressureAtElement = psi(validIndices)' * pressure(edofs);
-%         pressure(i) = pressure(i) + pressureAtElement * Detj * wp(ip);
-%     end
-% end
 
 rotationMatrix = [cosd(90) -sind(90); sind(90) cosd(90)];
 rotatedVectors = rotationMatrix * [arrow_u(:)'; arrow_v(:)'];   % Apply the rotation to the vectors
 u2 = reshape(rotatedVectors(1, :), size(arrow_x));    % Reshape the rotated vectors back to the original grid
 v2 = reshape(rotatedVectors(2, :), size(arrow_y));
-
-% Extract points on the left boundary
-leftBoundaryIndices = find(arrow_x == 0 & arrow_y >= 0 & arrow_y <= 900);
-
-% Interpolate the velocity field to a finer grid
-[xq, yq] = meshgrid(linspace(min(arrow_x), max(arrow_x), 100), linspace(min(arrow_y), max(arrow_y), 100));
-% scatter(xq,yq);
-uq = griddata(arrow_x, arrow_y, u2, xq, yq, 'linear');
-vq = griddata(arrow_x, arrow_y, v2, xq, yq, 'linear');
-
 figure;
 quiver(arrow_x, arrow_y, u2, v2);
-hold on;
-
-% Plot streamlines starting only from the left boundary
-streamline(xq, yq, uq, vq, arrow_x(leftBoundaryIndices), arrow_y(leftBoundaryIndices));
-
-axis equal;
-title('u2 with Streamlines (Left Boundary)');
 hold off;
 %%%%%%%%%%%%%
 

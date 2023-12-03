@@ -7,9 +7,9 @@ function [coordout, connectivityData] = readNXData(elementsFileName, nodesFileNa
     connectivityData = [];
     for i = 1:1:length(elementLines)
         columns = strsplit(elementLines{i});
-        cquad4Line = find(contains(columns, 'CQUAD4', 'IgnoreCase', true));
-        if ~isempty(cquad4Line)
-            numbers = str2double(columns(cquad4Line + 7: cquad4Line + 10));
+        cquad4Column = find(contains(columns, 'CQUAD4', 'IgnoreCase', true));
+        if ~isempty(cquad4Column)
+            numbers = str2double(columns(cquad4Column + 7: cquad4Column + 10));
             connectivityData = [connectivityData; numbers];
         end
     end
