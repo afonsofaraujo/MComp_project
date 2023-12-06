@@ -1,39 +1,36 @@
 function [coordout, connectivityData] = readNXData(elementsFileName, nodesFileName)
-    %% Extract connectivity from NX txt
-    fileID0 = fopen(elementsFileName, 'r');
-    formatSpec = '%c'; '%d'; %repetido 
-    elementLines = splitlines(fscanf(fileID0, formatSpec));
-    fclose(fileID0);
+    connectivityData = readElements(elementsFileName);
+    coordout = readNodes(nodesFileName);
+end
+
+function connectivityData = readElements(elementsFileName)
+    % Read connectivity data from elements file
+    fileID = fopen(elementsFileName, 'r');
+    elementLines = splitlines(fscanf(fileID, '%c')); % Read entire file as a string
+    fclose(fileID);
+
     connectivityData = [];
-    for i = 1:1:length(elementLines)
-        columns = strsplit(elementLines{i});
-        cquad4Column = find(contains(columns, 'CQUAD4', 'IgnoreCase', true));
-        if ~isempty(cquad4Column)
-            numbers = str2double(columns(cquad4Column + 7: cquad4Column + 10));
-            connectivityData = [connectivityData; numbers];
+    for i = 1:length(elementLines)
+        if contains(elementLines{i}, 'CQUAD4', 'IgnoreCase', true)
+            numbers = str2double(strsplit(elementLines{i}));
+            connectivityData = [connectivityData; numbers(end-3:end)];
         end
     end
-    %% Extract nodes from NX txt
-    fileID1 = fopen(nodesFileName, 'r');
-    formatSpec = '%c'; '%d';
-    nos = splitlines(fscanf(fileID1, formatSpec));
-    fclose(fileID1);
-    aux = [];
-    for i= 11:6:length(nos)
-        aux = [aux,nos(i)];
-    end
-    aux = aux';
-    colunas = split(aux);
-    coord1=[]; % Incialização
-    coord2=[];
-    coordx=[];
-    coordy=[];
-    coordout=[];
-    for i=1:1:length(colunas)
-        coord1=[coord1;colunas(i,5)];
-        coordx=[coordx;str2double(coord1(i))];
-        coord2=[coord2;colunas(i,6)];
-        coordy=[coordy;str2double(coord2(i))];
-        coordout=[coordout;i,coordx(i),coordy(i)];
-    end
+end
+
+function coordout = readNodes(nodesFileName)
+    % Read nodes data from nodes file
+    fileID = fopen(nodesFileName, 'r');
+    nodeLines = splitlines(fscanf(fileID, '%c')); % Read entire file as a string
+    fclose(fileID);
+
+    colunas = split(nodeLines(11:6:end));
+    coordx_mm = str2double(colunas(:, 5));
+    coordy_mm = str2double(colunas(:, 6));
+
+    % Convert from millimeters to meters
+    coordx = coordx_mm / 1000;
+    coordy = coordy_mm / 1000;
+
+    coordout = [(1:length(coordx))', coordx, coordy];
 end

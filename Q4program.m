@@ -1,84 +1,27 @@
-%PROGRAMA2
-close all; clear; clc
-%[coordout, connectivityData] = readNXData2('Elementscasosimples.txt', 'Nodescasosimples.txt');
+close all;
+clear;
+clc;
+
 [coordout, connectivityData] = readNXData('Elementscomsimetria.txt', 'Nodescomsimetria.txt');
 disp('Data loaded...');
-coordx = coordout(:,2);
-coordy = coordout(:,3);
-k = boundary(coordx,coordy,0.85);
-fronteira = [coordx(k),coordy(k)];
-ymax = max(fronteira(:,2));
-xmax = max(fronteira(:,1));
-xmin = min(fronteira(:,1));
-B1 = [];    % esquerda
-B2 = [];    % baixo
-B3 = [];    % direita
-B4 = [];    % cima
-s = [];     % índices já utilizados
-for i = 1:size(fronteira,1)
-    if fronteira(i,2) == ymax
-        B4 = [B4; fronteira(i,:)];
-        s = [s;i];
-    end
-    if fronteira(i,1) == xmin
-        B1 = [B1; fronteira(i,:)];
-        s = [s;i];
-    end
-    if fronteira(i,1) == xmax
-        B3 = [B3; fronteira(i,:)];
-        s = [s;i];
-    end
-end
-s = unique(s);  % retirar índices repetidos (cantos)
-for i = 1:size(fronteira,1)
-    if ~ismember(i,s)
-        B2 = [B2; fronteira(i,:)]; % B2 contém os pontos da fronteira não utilizados
-    end
-end
-B2 = [B2; xmax min(B3(:,2))];   % adicionar ponto final 
-B2 = [0 0; B2];                 % adicionar ponto inicial
-
+[fronteira, B1, B2, B3, B4] = identifyBoundary(coordout);
 disp('Assembly...');
-Nels = size(connectivityData, 1);
-Nnds = length(coordx);
-Kg = zeros(Nnds,Nnds); % inicialização
-fg = zeros(Nnds,1);
-for i=1:Nels    % Carregamento no elemento
-    edofs=[connectivityData(i, :)];
-    XN(1:4,1)=coordx(edofs);
-    XN(1:4,2)=coordy(edofs);
-    [Ke, fe]=Elem_Quad4(XN,0);  % carregamento 0
-    Kg(edofs,edofs)= Kg(edofs,edofs) + Ke;
-    fg(edofs,1)= fg(edofs,1) + fe;
-end
-
+[Kg, fg] = assembleGlobalMatrixAndForce(coordout, connectivityData); 
+disp('Global matrix assembled...');
 disp('Boundary conditions...');
-boom = 1.0e+14;
-U = 2.5;   % velocidade de entrada em m/s
-for i = 1:size(B1,1)    % B1
-    j = find(coordx == B1(i, 1) & coordy == B1(i, 2));
-    Kg(j, j) = boom;
-    fg(j) = boom*coordy(j)*U; % stream function = yU
-end
-for i = 1:size(B2,1)    % B2
-    j = find(coordx == B2(i, 1) & coordy == B2(i, 2)); % Find the corresponding node
-    Kg(j, j) = boom;
-    fg(j) = 0; % stream function = 0
-end
-for i = 1:size(B4,1)    % B4
-    j = find(coordx == B4(i, 1) & coordy == B4(i, 2));
-    Kg(j, j) = boom;
-    fg(j) = boom*ymax*U; % stream function = y_maxU
-end
-
+U = 2.5;
+[Kg, fg] = applyBoundaryConditions(Kg, fg, B1, B2, B4, coordout, U);
 disp('Solution...');
-u=Kg\fg;    % Resolução do sistema
+u = solveSystem(Kg, fg);
 disp('Post-processing...');
 
-
+Nels = size(connectivityData, 1);
+Nnds = length(coordout(:, 2));
+coordx = coordout(:,2);
+coordy = coordout(:,3);
 
 constant = 104450;  % 101325+0.5*2.5^2*1000
-rho = 1000; % water
+rho = 1000;         % 1000 water
 
 pressure = zeros(Nels, 1);
 fluxArray = zeros(Nels, 2); % Preallocate arrays for storing calculated values
@@ -113,10 +56,11 @@ inBoundary = inpolygon(fineX, fineY, fronteira(:,1), fronteira(:,2));
 fineU(~inBoundary) = NaN;   % Set values outside the boundary to NaN
 fineP(~inBoundary) = NaN;   % Set values outside the boundary to NaN
 
+disp(['Min fineU: ', num2str(min(fineU(:)))]);
+disp(['Max fineU: ', num2str(max(fineU(:)))]);
+
 figure;
-
 subplot(2, 1, 1);
-
 contourf(fineX, fineY, fineU, 20);
 hold on;
 plot(fronteira(:,1), fronteira(:,2), 'Color', 'k', 'LineWidth', 1);    % Plot boundary
@@ -127,7 +71,6 @@ axis equal;
 hold off;
 
 subplot(2, 1, 2);
-
 contour(fineX, fineY, fineU, 20,'LineColor','k');
 hold on;
 plot(fronteira(:,1), fronteira(:,2), 'Color', 'k', 'LineWidth', 1);    % Plot boundary
@@ -137,12 +80,10 @@ ylabel('Y-axis');
 axis equal;
 hold off;
 
-%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%
 
 figure;
 contour(fineX, fineY, fineP, 10,'LineColor','k',"ShowText",true,"LabelFormat","%0.2f bar",'LabelSpacing', 400);
-%contourf(fineX, fineY, fineP, 10);
-%colorbar;
 hold on;
 plot(fronteira(:,1), fronteira(:,2), 'Color', 'k', 'LineWidth', 1);    % Plot boundary
 title('P');
@@ -152,7 +93,6 @@ axis equal;
 hold off;
 
 %%%%%%%%%%%%%%%%%%
-
 
 Res = 0;
 arrow_x = [];   % Initialize arrays to store results
@@ -221,7 +161,6 @@ vec_y = rotatedVectors(2, :)';
 figure;
 
 subplot(2, 1, 1);
-
 quiver(arrow_x, arrow_y, u2, v2);
 axis equal;
 title('Pontos de integração');
@@ -230,50 +169,9 @@ ylabel('Y-axis');
 hold off;
 
 subplot(2, 1, 2);
-
 quiver(centroidArray(:, 1), centroidArray(:, 2), vec_x, vec_y);       % plot velocity arrows
 axis equal;
 title('Centróides');
 xlabel('X-axis');
 ylabel('Y-axis');
 hold off;
-
-%%%%%%%%%%%%%%%%%%%%% MIRROR
-
-
-
-
-
-
-
-%% Plot elements
-% figure;
-% hold on;
-% for i = 1:Nels
-%     currentConnectivity = connectivityData(i, :);
-%     x = coordx(currentConnectivity);
-%     y = coordy(currentConnectivity);
-%     patch(x, y, 'b', 'FaceAlpha', 0.5);
-% end
-% hold off;
-% axis equal;
-% grid on;
-% xlabel('X-axis');
-% ylabel('Y-axis');
-% title('Quad Elements Plot');
-%% Plot boundary
-% plot(B1(:,1), B1(:,2)), hold on;
-% plot(B2(:,1), B2(:,2));
-% plot(B3(:,1), B3(:,2));
-% plot(B4(:,1), B4(:,2)); 
-% legend(["B1","B2","B3","B4"]);
-% hold off;
-%% Plot solution
-% figure
-% for i=1:Nels
-% edofs=[connectivityData(i,:)];
-% fill3 (coordx(edofs),coordy(edofs),u(edofs),u(edofs));hold on
-% plot(coordx(edofs),coordy(edofs),'r');hold on
-% end
-% plot(coordx,coordy,'ro');
-% hold off;
