@@ -1,3 +1,4 @@
+%Q8
 close all;
 clear;
 clc;
@@ -27,11 +28,11 @@ fluxArray = zeros(Nels, 2); % Preallocate arrays for storing calculated values
 centroidArray = zeros(Nels, 2);
 for i = 1:Nels
     edofs = connectivityData(i, :);
-    XN(1:4, 1) = coordx(edofs); % Extract coordinates
-    XN(1:4, 2) = coordy(edofs);
+    XN(1:8, 1) = coordx(edofs); % Extract coordinates
+    XN(1:8, 2) = coordy(edofs);
     csi = 0;
     eta = 0;
-    [B, psi, Detj] = Shape_N_Der4(XN, csi, eta);    % Calculate shape functions and derivatives
+    [B, psi, Detj] = Shape_N_Der8(XN, csi, eta);    % Calculate shape functions and derivatives
     uint = psi' * u(edofs);
     xpint = XN' * psi;    % Position (x, y) of the centroid
     gradu = B' * u(edofs);
