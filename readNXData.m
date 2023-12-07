@@ -2,16 +2,22 @@ function [coordout, connectivityData] = readNXData(elementsFileName, nodesFileNa
     connectivityData = readElements(elementsFileName);
     coordout = readNodes(nodesFileName);
 end
-function connectivityData = readElements(elementsFileName) % Habilitar esta função a ler Q8
+function connectivityData = readElements(elementsFileName)
     % Read connectivity data from elements file
     fileID = fopen(elementsFileName, 'r');
     elementLines = splitlines(fscanf(fileID, '%c')); % Read entire file as a string
     fclose(fileID);
     connectivityData = [];
+    
     for i = 1:length(elementLines)
         if contains(elementLines{i}, 'CQUAD4', 'IgnoreCase', true)
             numbers = str2double(strsplit(elementLines{i}));
-            connectivityData = [connectivityData; numbers(end-3:end)];
+            elementData = numbers(end-3:end); % Extract the last 4 values for CQUAD4
+            connectivityData = [connectivityData; elementData];
+        elseif contains(elementLines{i}, 'CQUAD8', 'IgnoreCase', true)
+            numbers = str2double(strsplit(elementLines{i}));
+            elementData = numbers(end-7:end); % Extract the last 8 values for CQUAD8
+            connectivityData = [connectivityData; elementData];
         end
     end
 end

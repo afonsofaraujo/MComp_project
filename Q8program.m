@@ -3,7 +3,7 @@ close all;
 clear;
 clc;
 
-[coordout, connectivityData] = readNXData('Elementscomsimetria.txt', 'Nodescomsimetria.txt');
+[coordout, connectivityData] = readNXData('elements Q8.txt', 'nos Q8.txt');
 disp('Data loaded...');
 [fronteira, B1, B2, B3, B4] = identifyBoundary(coordout);
 disp('Assembly...');

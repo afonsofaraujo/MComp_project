@@ -14,6 +14,7 @@ U = 2.5;
 [Kg, fg] = applyBoundaryConditions(Kg, fg, B1, B2, B4, coordout, U);
 disp('Solution...');
 u = solveSystem(Kg, fg);
+disp('System solved...');
 disp('Post-processing...');
 
 Nels = size(connectivityData, 1);
