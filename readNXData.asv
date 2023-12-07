@@ -8,15 +8,19 @@ function connectivityData = readElements(elementsFileName)
     elementLines = splitlines(fscanf(fileID, '%c')); % Read entire file as a string
     fclose(fileID);
     connectivityData = [];
+    
     for i = 1:length(elementLines)
         if contains(elementLines{i}, 'CQUAD4', 'IgnoreCase', true)
-            columns = str2double(strsplit(elementLines{i}));
-            elementData = columns(end-3:end); % Extract the last 4 values for CQUAD4
+            numbers = str2double(strsplit(elementLines{i}));
+            elementData = numbers(end-3:end); % Extract the last 4 values for CQUAD4
             connectivityData = [connectivityData; elementData];
         elseif contains(elementLines{i}, 'CQUAD8', 'IgnoreCase', true)
-            columns = str2double(strsplit(elementLines{i}));
-            elementData = columns(end-7:end); % Extract the last 8 values for CQUAD8
-            elementData = [elementData(3), elementData(4), elementData(1), elementData(2), elementData(7), elementData(8), elementData(5), elementData(6)];
+            numbers = str2double(strsplit(elementLines{i}));
+            disp(numbers)
+            size(numbers)
+            disp('---------------')
+            elementData = numbers(end-3:end); % Extract the last 4 values for CQUAD4
+            elementData = [elementDta(3), numbers(4), numbers(1), numbers(2), numbers(7), numbers(8), numbers(5), numbers(6)];
             connectivityData = [connectivityData; elementData];
         end
     end

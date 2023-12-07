@@ -3,14 +3,17 @@ close all;
 clear;
 clc;
 
-[coordout, connectivityData] = readNXData('elements Q8.txt', 'nos Q8.txt');
+%[coordout, connectivityData] = readNXData('elements Q8.txt', 'nos Q8.txt');
+[coordout, connectivityData] = readNXData('el8.txt', 'nd8.txt');
 disp('Data loaded...');
-[fronteira, B1, B2, B3, B4] = identifyBoundary(coordout);
+[fronteira, B1, B2, B3, B4] = identifyBoundary(coordout, 0.3);
+disp('Boundary nodes identified...');
 disp('Assembly...');
 [Kg, fg] = assembleGlobalMatrixAndForce(coordout, connectivityData);
 disp('Boundary conditions...');
 U = 2.5;
 [Kg, fg] = applyBoundaryConditions(Kg, fg, B1, B2, B4, coordout, U);
+disp('Boundary conditions applied...');
 disp('Solution...');
 u = solveSystem(Kg, fg);
 disp('Post-processing...');
@@ -19,6 +22,67 @@ Nels = size(connectivityData, 1);
 Nnds = length(coordout(:, 2));
 coordx = coordout(:,2);
 coordy = coordout(:,3);
+
+
+
+% Plot boundary
+plot(B1(:,1), B1(:,2)), hold on;
+plot(B2(:,1), B2(:,2));
+plot(B3(:,1), B3(:,2));
+plot(B4(:,1), B4(:,2)); 
+legend(["B1","B2","B3","B4"]);
+hold off;
+
+
+
+
+% Plot elements
+connectivityPatch = zeros(size(connectivityData));
+for i = 1:length(connectivityData)
+    connectivityPatch(i,:) = [connectivityData(i,1), connectivityData(i,5),...
+    connectivityData(i,2), connectivityData(i,6), connectivityData(i,3),...
+    connectivityData(i,7), connectivityData(i,4), connectivityData(i,8)];
+end
+
+figure;
+hold on;
+for i = 1:Nels
+    currentConnectivity = connectivityPatch(i, :);
+    x = coordx(currentConnectivity);
+    y = coordy(currentConnectivity);
+    patch(x, y, 'b', 'FaceAlpha', 0.5);
+    for j = 1:length(currentConnectivity)
+        scatter(x(j), y(j), 20, 'r', 'filled');
+        text(x(j), y(j), num2str(currentConnectivity(j)), 'Color', 'k', 'FontSize', 8);
+    end
+end
+axis equal;
+axis off;
+hold off;
+
+
+% Plot solution
+figure
+for i=1:Nels
+    edofs=[connectivityPatch(i,:)];
+    fill3 (coordx(edofs),coordy(edofs),u(edofs),u(edofs));hold on
+    plot(coordx(edofs),coordy(edofs),'r');hold on
+end
+plot(coordx,coordy,'ro');
+hold off;
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 constant = 104450;  % 101325+0.5*2.5^2*1000
 rho = 1000;         % 1000 water
@@ -101,8 +165,8 @@ arrow_u = [];
 arrow_v = [];
 for i = 1:Nels
     edofs = connectivityData(i,:);
-    XN(1:4,1) = coordx(edofs);
-    XN(1:4,2) = coordy(edofs);
+    XN(1:8,1) = coordx(edofs);
+    XN(1:8,2) = coordy(edofs);
     csi = 0;
     eta = 0;
     nip = 4;
@@ -110,7 +174,7 @@ for i = 1:Nels
     for ip = 1:nip
         csi = xp(ip,1);
         eta = xp(ip,2);
-        [B, psi, Detj] = Shape_N_Der4(XN, csi, eta);
+        [B, psi, Detj] = Shape_N_Der8(XN, csi, eta);
         uint = psi' * u(edofs);
         Res = Res + uint * Detj * wp(ip);
         xpint = XN' * psi;
@@ -133,11 +197,11 @@ fluxArray = zeros(Nels, 2); % Preallocate arrays for storing calculated values
 centroidArray = zeros(Nels, 2);
 for i = 1:Nels
     edofs = connectivityData(i, :);
-    XN(1:4, 1) = coordx(edofs); % Extract coordinates
-    XN(1:4, 2) = coordy(edofs);
+    XN(1:8, 1) = coordx(edofs); % Extract coordinates
+    XN(1:8, 2) = coordy(edofs);
     csi = 0;
     eta = 0;
-    [B, psi, Detj] = Shape_N_Der4(XN, csi, eta);    % Calculate shape functions and derivatives
+    [B, psi, Detj] = Shape_N_Der8(XN, csi, eta);    % Calculate shape functions and derivatives
     uint = psi' * u(edofs);
     xpint = XN' * psi;    % Position (x, y) of the centroid
     gradu = B' * u(edofs);

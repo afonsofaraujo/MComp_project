@@ -23,7 +23,6 @@ function [Kg, fg] = assembleGlobalMatrixAndForce(coordout, connectivityData)
                 Kg(edofs, edofs) = Kg(edofs, edofs) + Ke;
                 fg(edofs, 1) = fg(edofs, 1) + fe;
             end
-
         otherwise
             error('Unsupported connectivityData size.');
     end

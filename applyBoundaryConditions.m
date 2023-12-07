@@ -17,6 +17,4 @@ function [Kg, fg] = applyBoundaryConditions(Kg, fg, B1, B2, B4, coordout, U)
         Kg(j, j) = boom;
         fg(j) = boom * max(B4(:, 2)) * U;
     end
-
-    disp('Boundary conditions applied...');
 end

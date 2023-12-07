@@ -1,9 +1,8 @@
-function [fronteira, B1, B2, B3, B4] = identifyBoundary(coordout)
+function [fronteira, B1, B2, B3, B4] = identifyBoundary(coordout,p)
     coordx = coordout(:, 2);
     coordy = coordout(:, 3);
-    k = boundary(coordx, coordy, 0.85);
+    k = boundary(coordx, coordy, p);
     fronteira = [coordx(k), coordy(k)];
-
     ymax = max(fronteira(:,2));
     xmax = max(fronteira(:,1));
     xmin = min(fronteira(:,1));
@@ -34,6 +33,8 @@ function [fronteira, B1, B2, B3, B4] = identifyBoundary(coordout)
     end
     B2 = [B2; xmax min(B3(:,2))];   % adicionar ponto final 
     B2 = [0 0; B2];                 % adicionar ponto inicial
-
-    disp('Boundary nodes identified...');
+    B1 = unique(B1, 'rows');
+    B2 = unique(B2, 'rows');
+    B3 = unique(B3, 'rows');
+    B4 = unique(B4, 'rows');
 end

@@ -66,15 +66,15 @@ plot(coordx,coordy,'ro');
 hold off;
 
 %% Plot elements
-figure;
-hold on;
-for i = 1:Nels
-    currentConnectivity = connectivityData(i, :);
-    x = coordx(currentConnectivity);
-    y = coordy(currentConnectivity);
-    patch(x, y, 'b', 'FaceAlpha', 0.5);
-end
-hold off;
+% figure;
+% hold on;
+% for i = 1:Nels
+%     currentConnectivity = connectivityData(i, :);
+%     x = coordx(currentConnectivity);
+%     y = coordy(currentConnectivity);
+%     patch(x, y, 'b', 'FaceAlpha', 0.5);
+% end
+% hold off;
 % axis equal;
 % grid on;
 % xlabel('X-axis');
