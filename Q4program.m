@@ -3,7 +3,7 @@ close all;
 clear;
 clc;
 
-%Leitura do ficheiro da mesh
+%Leitura do ficheiro msh
 
 [coordout, connectivityData] = readNXData('Elementscomsimetria.txt', 'Nodescomsimetria.txt');
 disp('Data loaded...');

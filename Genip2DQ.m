@@ -7,7 +7,7 @@ function [xp wp]=Genip2DQ (nip)
 %----------------------------------------------------------------
 if (nip == 4)   % 2x2 = 4 pontos, grau 3
 G=sqrt(1.0/3.0);
-xp=[-G G G -G;-G -G G G]' ;
+xp=[-G G G -G;-G -G G G]';
 wp=[1 1 1 1]';
 end
 if (nip == 9)   % 3x3 = 9 pontos, grau 5
