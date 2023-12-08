@@ -21,7 +21,6 @@ function [B, psi, Detj]=Shape_N_Der4 (XN,csi,eta)
     Detj = det(jaco) ;
     %jacobiano de x y para csi eta
     Invj = inv(jaco) ;
-    %matriz com as derivadas das funções de forma em x y
-    %(1ª coluna) e em ordem a y (2ª coluna)
+    %matriz com as derivadas das funções de forma em x y 
     B = Dpsi*Invj ;
 end
