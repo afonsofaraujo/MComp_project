@@ -103,7 +103,7 @@ else
     
     % Pressure
     figure;
-    contourf(fineX, fineY, finePt, 10,'LineColor','k',"ShowText",true,"LabelFormat","%0.2f bar",'LabelSpacing', 400), hold on;
+    contour(fineX, fineY, finePt, 10,'LineColor','k',"ShowText",true,"LabelFormat","%0.2f bar",'LabelSpacing', 400), hold on;
     plot(fronteirat(:,1), fronteirat(:,2), 'Color', 'k', 'LineWidth', 1);
     title('P'), xlabel('X-axis'), ylabel('Y-axis'), axis equal, hold off;
 end
