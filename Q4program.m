@@ -86,8 +86,16 @@ else
     pxcentroid = [xcentroid; xcentroid];
     pycentroid = [ycentroid; 2*max(coordy)-ycentroid];
     pressuret = [pressure; pressure];
-    
     [fineX, fineY, fineUt, finePt] = interpolateAndMask(px, py, ut, pressuret, pxcentroid, pycentroid, fronteirat, 2);
+    [Res, xint, yint, vxint, vyint] = calculateVelocityAtIntegrationPoints(connectivityData, coordx, coordy, u, 4, elementType);
+    xintt = [xint; xint];
+    yintt = [yint; 2*max(coordy)-yint];
+    vxintt = [vxint; vxint];
+    vyintt = [vyint; -vyint];
+
+    [vx, vy] = calculateCentroidsVelocity(connectivityData, coordx, coordy, u, elementType);
+    vxt = [vx; vx];
+    vyt = [vy; -vy];
     
     % Stream lines
     figure, subplot(2, 1, 1);
@@ -106,4 +114,19 @@ else
     contour(fineX, fineY, finePt, 10,'LineColor','k',"ShowText",true,"LabelFormat","%0.2f bar",'LabelSpacing', 400), hold on;
     plot(fronteirat(:,1), fronteirat(:,2), 'Color', 'k', 'LineWidth', 1);
     title('P'), xlabel('X-axis'), ylabel('Y-axis'), axis equal, hold off;
+
+    % Velocity
+    figure, subplot(2, 1, 1);
+    quiver(xintt, yintt, vxintt, vyintt), hold on;
+    B6 = [B2(:,1), 2*max(coordy)-B2(:,2)];
+    plot(B2(:,1), B2(:,2),'k', 'LineWidth', 0.5);
+    plot(B6(:,1), B6(:,2),'k', 'LineWidth', 0.5);
+    %plot(fronteirat(:,1), fronteirat(:,2), 'Color', 'k', 'LineWidth', 0.5);
+    title('Pontos de integração'), xlabel('X-axis'), ylabel('Y-axis'), axis equal, hold off;
+    subplot(2, 1, 2);
+    quiver(pxcentroid, pycentroid, vxt, vyt), hold on;
+    plot(B2(:,1), B2(:,2),'k', 'LineWidth', 0.5);
+    plot(B6(:,1), B6(:,2),'k', 'LineWidth', 0.5);
+    %plot(fronteirat(:,1), fronteirat(:,2), 'Color', 'k', 'LineWidth', 0.5);
+    title('Centróides'), xlabel('X-axis'), ylabel('Y-axis'), axis equal, hold off;
 end
