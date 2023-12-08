@@ -37,27 +37,13 @@ pressure = calculatePressure(connectivityData, coordx, coordy, u, elementType);
 
 
 
-surf(fineXY(:,1),fineXY(:,2),fineU(:))
+plot3d(fineXY(:,1),fineXY(:,2),fineU)
 
 
 
-% Scatter plot for fineU
-figure;
-scatter(fineXY(:, 1), fineXY(:, 2), 50, fineU, 'filled');
-colorbar;
-title('Fine U Distribution');
-xlabel('X-axis');
-ylabel('Y-axis');
-axis equal;
 
-% Scatter plot for fineP
-figure;
-scatter(fineXY(:, 1), fineXY(:, 2), 50, fineP, 'filled');
-colorbar;
-title('Fine P Distribution');
-xlabel('X-axis');
-ylabel('Y-axis');
-axis equal;
+
+
 
 
 
