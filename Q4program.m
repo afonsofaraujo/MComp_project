@@ -1,13 +1,19 @@
-%Q4
+%Solução para elementos de 4 nós - Q4
 close all;
 clear;
 clc;
 
+%Leitura do ficheiro msh
+
 [coordout, connectivityData] = readNXData('Elementscomsimetria.txt', 'Nodescomsimetria.txt');
 disp('Data loaded...');
+
+%Definição da fronteira
+
 [fronteira, B1, B2, B3, B4] = identifyBoundary(coordout, 0.85);
 disp('Boundary nodes identified...');
 disp('Assembly...');
+
 [Kg, fg] = assembleGlobalMatrixAndForce(coordout, connectivityData); 
 disp('Global matrix assembled...');
 disp('Boundary conditions...');

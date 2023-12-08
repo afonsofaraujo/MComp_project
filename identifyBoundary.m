@@ -1,6 +1,7 @@
 function [fronteira, B1, B2, B3, B4] = identifyBoundary(coordout,p)
     coordx = coordout(:, 2);
     coordy = coordout(:, 3);
+    
     k = boundary(coordx, coordy, p);
     fronteira = [coordx(k), coordy(k)];
     ymax = max(fronteira(:,2));

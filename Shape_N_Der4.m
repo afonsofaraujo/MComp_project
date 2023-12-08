@@ -1,3 +1,5 @@
+%Função de forma para elementos lineares
+
 function [B, psi, Detj]=Shape_N_Der4 (XN,csi,eta)
     psi=zeros(4,1);
     psi(1) = (1-csi)*(1-eta)/4;
