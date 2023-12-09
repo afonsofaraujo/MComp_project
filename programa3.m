@@ -80,13 +80,34 @@ hold off;
 % xlabel('X-axis');
 % ylabel('Y-axis');
 % title('Quad Elements Plot');
-%% Plot boundary
-% plot(B1(:,1), B1(:,2)), hold on;
-% plot(B2(:,1), B2(:,2));
-% plot(B3(:,1), B3(:,2));
-% plot(B4(:,1), B4(:,2)); 
-% legend(["B1","B2","B3","B4"]);
-% hold off;
+% Plot boundary
+plot(B1(:,1), B1(:,2)), hold on;
+plot(B2(:,1), B2(:,2));
+plot(B3(:,1), B3(:,2));
+plot(B4(:,1), B4(:,2)); 
+legend(["B1","B2","B3","B4"]);
+hold off;
+
+
+
+
+% Your existing code
+plot(B1(:,1), B1(:,2), 'LineWidth', 2), hold on;
+plot(B2(:,1), B2(:,2), 'LineWidth', 2);
+plot(B3(:,1), B3(:,2), 'LineWidth', 2);
+plot(B4(:,1), B4(:,2), 'LineWidth', 2); 
+legend(["B1","B2","B3","B4"]);
+axis equal;   % Make the axes equal
+axis on;      % Turn on the axis
+axis([-0.5, 4.5, -0.5, 2.5]);
+text(-0.2, 0.45, 'B1', 'FontSize', 12, 'VerticalAlignment', 'bottom');
+text(1.7, -0.2, 'B2', 'FontSize', 12, 'VerticalAlignment', 'bottom');
+text(3.9, 0.7, 'B3', 'FontSize', 12, 'VerticalAlignment', 'bottom');
+text(1.7, 1, 'B4', 'FontSize', 12, 'VerticalAlignment', 'bottom');
+hold off;
+
+
+
 %% Plot solution
 % figure
 % for i=1:Nels

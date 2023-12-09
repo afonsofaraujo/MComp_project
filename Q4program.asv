@@ -1,40 +1,42 @@
-%Solução para elementos de 4 nós - Q4
+% Solução para elementos de 4 nós - Q4
 close all;
-clear;
-clc;
+clear, clc;
 
-%Leitura do ficheiro msh
+elementType = 'QUAD4';
+boundaryParameter = 0.85;
+elementsFileName = 'Elements.txt';
+nodesFileName = 'nodesQ4base.txt';
+U = 2.5;    % velocidade de entrada em m/s
 
-[coordout, connectivityData] = readNXData('Elementscomsimetria.txt', 'Nodescomsimetria.txt');
+% Leitura do ficheiro
+[coordout, connectivityData] = readNXData(elementsFileName, nodesFileName);
 disp('Data loaded...');
 
-%Definição da fronteira
-
-[fronteira, B1, B2, B3, B4] = identifyBoundary(coordout, 0.85);
+% Definição da fronteira
+[fronteira, B1, B2, B3, B4] = identifyBoundary(coordout, boundaryParameter);
 disp('Boundary nodes identified...');
-disp('Assembly...');
 
+% Assemblagem
 [Kg, fg] = assembleGlobalMatrixAndForce(coordout, connectivityData); 
 disp('Global matrix assembled...');
-disp('Boundary conditions...');
-U = 2.5;    % velocidade de entrada em m/s
+
+% Condições de fronteira
 [Kg, fg] = applyBoundaryConditions(Kg, fg, B1, B2, B4, coordout, U);
 disp('Boundary conditions applied...');
-disp('Solution...');
+
+% Resolução do sistema
 u = solveSystem(Kg, fg);
 disp('System solved...');
 
-%%%%%%%%%%%%%%
-
+% Pós-processamento
 disp('Post-processing...');
 
-elementType = 'QUAD4';
 Nels = size(connectivityData, 1);
 Nnds = length(coordout(:, 2));
 coordx = coordout(:,2);
 coordy = coordout(:,3);
 
-half = 0; % For half piece half = 1, whole half = 0,
+half = 1; % For half piece half = 1, whole half = 0,
 
 if half
 
@@ -64,11 +66,11 @@ if half
     % Velocity
     figure, subplot(2, 1, 1);
     quiver(xint, yint, vxint, vyint);
-    title('Pontos de integração'), xlabel('X-axis'), ylabel('Y-axis'), axis equal, hold off;
+    title('Pontos de integração'), xlabel('X-axis'), ylabel('Y-axis'), axis equal;
 
     subplot(2, 1, 2);
     quiver(xcentroid, ycentroid, vx, vy);
-    title('Centróides'), xlabel('X-axis'), ylabel('Y-axis'), axis equal, hold off;
+    title('Centróides'), xlabel('X-axis'), ylabel('Y-axis'), axis equal;
 else
     pressure = calculatePressure(connectivityData, coordx, coordy, u, elementType);
     px = [coordx(:); coordx(:)];
@@ -118,17 +120,15 @@ else
     % Velocity
     figure, subplot(2, 1, 1);
     quiver(xintt, yintt, vxintt, vyintt), hold on;
-    plot(fronteirat(:,1), fronteirat(:,2), 'Color', 'k', 'LineWidth', 0.5);
+    B6 = [B2(:,1), 2*max(coordy)-B2(:,2)];
+    plot(B2(:,1), B2(:,2),'k', 'LineWidth', 0.5);
+    plot(B6(:,1), B6(:,2),'k', 'LineWidth', 0.5);
+    %plot(fronteirat(:,1), fronteirat(:,2), 'Color', 'k', 'LineWidth', 0.5);
     title('Pontos de integração'), xlabel('X-axis'), ylabel('Y-axis'), axis equal, hold off;
     subplot(2, 1, 2);
     quiver(pxcentroid, pycentroid, vxt, vyt), hold on;
-
-    B6 = [B3(:,1), 2*max(coordy)-B3(:,2)];
-
-
-    plot(B2(:,1), B2(:,2),'k', 'LineWidth', 1);
-    plot(B6(:,1), B6(:,2),'k', 'LineWidth', 1);
-
+    plot(B2(:,1), B2(:,2),'k', 'LineWidth', 0.5);
+    plot(B6(:,1), B6(:,2),'k', 'LineWidth', 0.5);
     %plot(fronteirat(:,1), fronteirat(:,2), 'Color', 'k', 'LineWidth', 0.5);
     title('Centróides'), xlabel('X-axis'), ylabel('Y-axis'), axis equal, hold off;
 end

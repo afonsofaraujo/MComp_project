@@ -13,7 +13,6 @@ function [Kg, fg] = assembleGlobalMatrixAndForce(coordout, connectivityData)
                 Kg(edofs, edofs) = Kg(edofs, edofs) + Ke;
                 fg(edofs, 1) = fg(edofs, 1) + fe;
             end
-
         case 8
             for i = 1:Nels
                 edofs = connectivityData(i, :);

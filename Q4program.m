@@ -1,40 +1,42 @@
-%Solução para elementos de 4 nós - Q4
+% Solução para elementos de 4 nós - Q4
 close all;
-clear;
-clc;
+clear, clc;
 
-%Leitura do ficheiro msh
+elementType = 'QUAD4';
+boundaryParameter = 0.85;
+elementsFileName = 'Elements.txt';
+nodesFileName = 'nodesQ4base.txt';
+U = 2.5;    % velocidade de entrada em m/s
 
-[coordout, connectivityData] = readNXData('Elementscomsimetria.txt', 'Nodescomsimetria.txt');
+% Leitura do ficheiro
+[coordout, connectivityData] = readNXData(elementsFileName, nodesFileName);
 disp('Data loaded...');
 
-%Definição da fronteira
-
-[fronteira, B1, B2, B3, B4] = identifyBoundary(coordout, 0.85);
+% Definição da fronteira
+[fronteira, B1, B2, B3, B4] = identifyBoundary(coordout, boundaryParameter);
 disp('Boundary nodes identified...');
-disp('Assembly...');
 
+% Assemblagem
 [Kg, fg] = assembleGlobalMatrixAndForce(coordout, connectivityData); 
 disp('Global matrix assembled...');
-disp('Boundary conditions...');
-U = 2.5;    % velocidade de entrada em m/s
+
+% Condições de fronteira
 [Kg, fg] = applyBoundaryConditions(Kg, fg, B1, B2, B4, coordout, U);
 disp('Boundary conditions applied...');
-disp('Solution...');
+
+% Resolução do sistema
 u = solveSystem(Kg, fg);
 disp('System solved...');
 
-%%%%%%%%%%%%%%
-
+% Pós-processamento
 disp('Post-processing...');
 
-elementType = 'QUAD4';
 Nels = size(connectivityData, 1);
 Nnds = length(coordout(:, 2));
 coordx = coordout(:,2);
 coordy = coordout(:,3);
 
-half = 0; % For half piece half = 1, whole half = 0,
+half = 1; % For half piece half = 1, whole half = 0,
 
 if half
 
@@ -64,11 +66,11 @@ if half
     % Velocity
     figure, subplot(2, 1, 1);
     quiver(xint, yint, vxint, vyint);
-    title('Pontos de integração'), xlabel('X-axis'), ylabel('Y-axis'), axis equal, hold off;
+    title('Pontos de integração'), xlabel('X-axis'), ylabel('Y-axis'), axis equal;
 
     subplot(2, 1, 2);
     quiver(xcentroid, ycentroid, vx, vy);
-    title('Centróides'), xlabel('X-axis'), ylabel('Y-axis'), axis equal, hold off;
+    title('Centróides'), xlabel('X-axis'), ylabel('Y-axis'), axis equal;
 else
     pressure = calculatePressure(connectivityData, coordx, coordy, u, elementType);
     px = [coordx(:); coordx(:)];
