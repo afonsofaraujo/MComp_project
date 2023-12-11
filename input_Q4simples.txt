@@ -1,7 +1,7 @@
-titulo: Q4simples
-tipo de elemento: QUAD4
-parametro da fronteira: 0.5
-coordenadas dos nos
+Título: input_Q4simples
+Tipo de elemento: QUAD4
+Parâmetro da fronteira: 0.5
+Coordenadas dos nós
 182
 1 1.9760 0.7500
 2 1.9760 0.6000
@@ -185,7 +185,7 @@ coordenadas dos nos
 180 0.0000 0.0000
 181 3.8000 0.0000
 182 3.8000 0.9000
-matriz de incidencias/conetividades
+Matriz de incidências/Conetividades
 150
 1 1 4 15 147 148 18
 2 1 4 19 17 13 14
@@ -337,10 +337,10 @@ matriz de incidencias/conetividades
 148 1 4 120 116 115 119
 149 1 4 91 170 171 120
 150 1 4 91 120 119 92
-propriedades material
+Propriedades material
 1
 1 1000
-Fontes/carregamentos distribuídos
+Fontes/Carregamentos distribuídos
 0
 Condição fronteira essencial
 59
@@ -403,7 +403,7 @@ Condição fronteira essencial
 173 2.2500
 179 2.2500
 182 2.2500
-Fontes/cargas pontuais impostas
+Fontes/Cargas pontuais impostas
 0
 Fluxo imposto na fronteira
 0

@@ -6,10 +6,10 @@ function [nodeCoordinates, matrixIncidences, materialProperties,...
     % Skip the first line
     fgetl(fid);
     % Tipo de elemento
-    elementType = fscanf(fid, 'tipo de elemento: %s');
+    elementType = fscanf(fid, 'Tipo de elemento: %s');
     fgetl(fid);
     % Parametro da fronteira
-    boundaryParameter = fscanf(fid, 'parametro da fronteira: %f');
+    boundaryParameter = fscanf(fid, 'Parâmetro da fronteira: %f');
     fgetl(fid);
     fgetl(fid);
     % Coordenadas dos nos
