@@ -11,6 +11,10 @@ outputfileName = 'output_Q4base.txt';
 % outputfileName = 'output_Q8base.txt';
 %%%%%%%%%%%%%
 
+%%%%%%%%%%%%%
+half = 0; % For half piece (half = 1), whole (half = 0=,
+%%%%%%%%%%%%%
+
 [nodeCoordinates, matrixIncidences, materialProperties,... 
  distributedLoads, essentialBCs, pointLoads, imposedFlux,...
  naturalConvection, elementType, boundaryParameter] = readDadosEscalar(inputFileName);
@@ -18,8 +22,6 @@ outputfileName = 'output_Q4base.txt';
 [fronteira, B1, B2, B3, B4] = identifyBoundary(nodeCoordinates, boundaryParameter);
 coordx = nodeCoordinates(:,2);
 coordy = nodeCoordinates(:,3);
-
-half = 0; % For half piece half = 1, whole half = 0,
 
 if half
 

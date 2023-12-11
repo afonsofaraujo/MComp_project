@@ -13,7 +13,7 @@ inputFileName = 'input_Q4base.txt';
  naturalConvection, elementType, boundaryParameter] = readDadosEscalar(inputFileName);
 
 disp('Load Data...');
-coordx = nodeCoordinates(:,2);
+coordx = nodeCoordSinates(:,2);
 coordy = nodeCoordinates(:,3);
 
 if strcmp(elementType, 'QUAD4')
