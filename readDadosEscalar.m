@@ -1,13 +1,17 @@
 function [nodeCoordinates, matrixIncidences, materialProperties,... 
         distributedLoads, essentialBCs, pointLoads, imposedFlux,...
-        naturalConvection] = readDadosEscalar(fileName)
-    %fileName = 'dados-escalar.txt';
+        naturalConvection, elementType, boundaryParameter] = readDadosEscalar(fileName)
     % Extract node coordinates from txt
     fid = fopen(fileName, 'r');
-    % Skip the first three lines
-    for i = 1:2
-        fgetl(fid);
-    end
+    % Skip the first line
+    fgetl(fid);
+    % Tipo de elemento
+    elementType = fscanf(fid, 'tipo de elemento: %s');
+    fgetl(fid);
+    % Parametro da fronteira
+    boundaryParameter = fscanf(fid, 'parametro da fronteira: %f');
+    fgetl(fid);
+    fgetl(fid);
     % Coordenadas dos nos
     Nnds = fscanf(fid, '%d', 1);
     fgetl(fid);
@@ -17,7 +21,11 @@ function [nodeCoordinates, matrixIncidences, materialProperties,...
     % Matrix de incidencias/conectividades
     Nels = fscanf(fid, '%d', 1);
     fgetl(fid);
-    matrixIncidences = fscanf(fid, '%d', [7, Nels])';
+    if strcmp(elementType, 'QUAD4')
+        matrixIncidences = fscanf(fid, '%d', [7, Nels])';
+    elseif strcmp(elementType, 'QUAD8')
+        matrixIncidences = fscanf(fid, '%d', [11, Nels])';
+    end
     fgetl(fid);
     fgetl(fid);
     % Propriedades/Material

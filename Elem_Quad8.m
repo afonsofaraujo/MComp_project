@@ -8,8 +8,8 @@ function [Ke, fe] = Elem_Quad8(XN, fL)
         eta = xp(ip, 2);
         [B, psi, Detj] = Shape_N_Der8(XN, csi, eta);
         wip = wp(ip) * Detj;
-        Ke = Ke + wip * B * B';  %   stiffness matrix
+        Ke = Ke + wip * B * B';  %
         wipf = fL * wip;
-        fe = fe + wipf * psi;    %   force vector
+        fe = fe + wipf * psi;
     end
 end

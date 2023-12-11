@@ -1,49 +1,48 @@
-% Solução para elementos de 4 nós - Q4
+% FEM_G68
 close all;
 clear, clc;
 
-elementType = 'QUAD4';
-boundaryParameter = 0.85;
-elementsFileName = 'Elements.txt';
-nodesFileName = 'nodesQ4base.txt';
-U = 2.5;    % velocidade de entrada em m/s
+% inputFileName = 'input-Q4simples.txt';
+% inputFileName = 'input-Q4base.txt';
+inputFileName = 'input-Q8base.txt';
 
-% Leitura do ficheiro
-[coordout, connectivityData] = readNXData(elementsFileName, nodesFileName);
-disp('Data loaded...');
+[nodeCoordinates, matrixIncidences, materialProperties,... 
+ distributedLoads, essentialBCs, pointLoads, imposedFlux,...
+ naturalConvection, elementType, boundaryParameter] = readDadosEscalar(inputFileName);
 
-% Definição da fronteira
-[fronteira, B1, B2, B3, B4] = identifyBoundary(coordout, boundaryParameter);
-disp('Boundary nodes identified...');
+disp('Load Data...');
+coordx = nodeCoordinates(:,2);
+coordy = nodeCoordinates(:,3);
 
-% Assemblagem
-[Kg, fg] = assembleGlobalMatrixAndForce(coordout, connectivityData); 
-disp('Global matrix assembled...');
+if strcmp(elementType, 'QUAD4')
+    connectivityData = matrixIncidences(:, 4:7);
+elseif strcmp(elementType, 'QUAD8')
+    connectivityData = matrixIncidences(:, 4:11);
+end
 
-% Condições de fronteira
-[Kg, fg] = applyBoundaryConditions(Kg, fg, B1, B2, B4, coordout, U);
-disp('Boundary conditions applied...');
+disp('Assembly...');
+[Kg, fg] = assemblyGlobalMatrixAndForce(nodeCoordinates, connectivityData);
 
-% Resolução do sistema
-u = solveSystem(Kg, fg);
-disp('System solved...');
+disp('Boundary Conditions...');
+[Kg, fg] = applyBCs(Kg, fg, essentialBCs);
 
-% Pós-processamento
+disp('Solution...');
+u=Kg\fg;    % Resolução do sistema
+
+%%%%%%%%%%%%%%%%%%%%%%
+
 disp('Post-processing...');
 
-Nels = size(connectivityData, 1);
-Nnds = length(coordout(:, 2));
-coordx = coordout(:,2);
-coordy = coordout(:,3);
+[fronteira, B1, B2, B3, B4] = identifyBoundary(nodeCoordinates, boundaryParameter);
 
-half = 1; % For half piece half = 1, whole half = 0,
+half = 0; % For half piece half = 1, whole half = 0,
 
 if half
 
-    [xcentroid, ycentroid] = computeCentroids(connectivityData, coordx, coordy, elementType);
-    pressure = calculatePressure(connectivityData, coordx, coordy, u, elementType);
+    [xcentroid, ycentroid] = calculateCentroids(connectivityData, coordx, coordy, elementType);
+    pressure = calculatePressure(connectivityData, coordx, coordy, u, elementType, materialProperties(1,2));
     [fineX, fineY, fineU, fineP] = interpolateAndMask(coordx, coordy, u, pressure, xcentroid, ycentroid, fronteira, 2);
-    [vx, vy] = calculateCentroidsVelocity(connectivityData, coordx, coordy, u, elementType);
+    [vx, vy] = calculateVelocityAtCentroids(connectivityData, coordx, coordy, u, elementType);
     [Res, xint, yint, vxint, vyint] = calculateVelocityAtIntegrationPoints(connectivityData, coordx, coordy, u, 4, elementType);
     
     % Streamlines
@@ -72,7 +71,7 @@ if half
     quiver(xcentroid, ycentroid, vx, vy);
     title('Centróides'), xlabel('X-axis'), ylabel('Y-axis'), axis equal;
 else
-    pressure = calculatePressure(connectivityData, coordx, coordy, u, elementType);
+    pressure = calculatePressure(connectivityData, coordx, coordy, u, elementType, materialProperties(1,2));
     px = [coordx(:); coordx(:)];
     py = [coordy(:); 2*max(coordy(:))-coordy(:)];
     [pxpy, uniqueIndices] = unique([px, py], 'rows');
@@ -84,7 +83,7 @@ else
     B6 = flipud([B2(:,1), 2*max(coordy)-B2(:,2)]);
     B7 = [B1(:,1), 2*max(coordy)-B1(:,2)];
     fronteirat = [B1;B2;B3;B5;B6;B7];
-    [xcentroid, ycentroid] = computeCentroids(connectivityData, coordx, coordy, elementType);
+    [xcentroid, ycentroid] = calculateCentroids(connectivityData, coordx, coordy, elementType);
     pxcentroid = [xcentroid; xcentroid];
     pycentroid = [ycentroid; 2*max(coordy)-ycentroid];
     pressuret = [pressure; pressure];
@@ -95,7 +94,7 @@ else
     vxintt = [vxint; vxint];
     vyintt = [vyint; -vyint];
 
-    [vx, vy] = calculateCentroidsVelocity(connectivityData, coordx, coordy, u, elementType);
+    [vx, vy] = calculateVelocityAtCentroids(connectivityData, coordx, coordy, u, elementType);
     vxt = [vx; vx];
     vyt = [vy; -vy];
     

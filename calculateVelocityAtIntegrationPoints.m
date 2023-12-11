@@ -31,7 +31,6 @@ function [Res, xint, yint, u1, v1] = calculateVelocityAtIntegrationPoints(connec
             arrow_v = [arrow_v; fluxu(2)];
         end
     end
-    % Rotate vectors for quiver plot
     rotatedVectors = rotationMatrix * [arrow_u(:)'; arrow_v(:)'];
     u1 = reshape(rotatedVectors(1, :), size(xint));
     v1 = reshape(rotatedVectors(2, :), size(yint));

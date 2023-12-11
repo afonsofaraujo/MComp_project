@@ -1,7 +1,6 @@
-function pressure = calculatePressure(connectivityData, coordx, coordy, u, elementType)
+function pressure = calculatePressure(connectivityData, coordx, coordy, u, elementType, materialProperty)
     Nels = size(connectivityData, 1);
     constant = 104450;  % 101325+0.5*2.5^2*1000
-    rho = 1000;         % 1000 water
     pressure = zeros(Nels, 1);
     fluxArray = zeros(Nels, 2); % Preallocate arrays for storing calculated values
     for i = 1:Nels
@@ -19,7 +18,7 @@ function pressure = calculatePressure(connectivityData, coordx, coordy, u, eleme
         uint = psi' * u(edofs);
         gradu = B' * u(edofs);
         fluxu = -gradu;
-        fluxArray(i, :) = fluxu;        % store flux values
-        pressure(i) = (constant - 0.5*rho*(sqrt(fluxu(1)^2 + fluxu(2)^2))^2) * 10^(-5);  % pressure in bar
+        fluxArray(i, :) = fluxu;
+        pressure(i) = (constant - 0.5*materialProperty*(sqrt(fluxu(1)^2 + fluxu(2)^2))^2) * 10^(-5);  % pressure in bar
     end
 end

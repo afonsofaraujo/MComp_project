@@ -1,5 +1,5 @@
 function [B, psi, Detj] = Shape_N_Der8(XN, csi, eta)
-    psi=zeros(8,1);
+    psi = zeros(8,1);
     psi(1) = (csi-1)*(eta+csi+1)*(1-eta)/4;
     psi(2) = (1+csi)*(1-eta)*(csi-eta-1)/4;
     psi(3) = (1+csi)*(1+eta)*(csi+eta-1)/4;

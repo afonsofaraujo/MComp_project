@@ -1,8 +1,7 @@
-function [fronteira, B1, B2, B3, B4] = identifyBoundary(coordout,p)
-    coordx = coordout(:, 2);
-    coordy = coordout(:, 3);
-    
-    k = boundary(coordx, coordy, p);
+function [fronteira, B1, B2, B3, B4] = identifyBoundary(nodeCoordinates, boundaryParameter)
+    coordx = nodeCoordinates(:, 2);
+    coordy = nodeCoordinates(:, 3);
+    k = boundary(coordx, coordy, boundaryParameter);
     fronteira = [coordx(k), coordy(k)];
     ymax = max(fronteira(:,2));
     xmax = max(fronteira(:,1));
