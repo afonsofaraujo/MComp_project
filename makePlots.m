@@ -5,10 +5,10 @@ clear, clc;
 %%%%%%%%%%%%%
 % inputFileName = 'input_Q4simples.txt';
 % outputfileName = 'output_Q4simples.txt';
-inputFileName = 'input_Q4base.txt';
-outputfileName = 'output_Q4base.txt';
-% inputFileName = 'input_Q8base.txt';
-% outputfileName = 'output_Q8base.txt';
+% inputFileName = 'input_Q4base.txt';
+% outputfileName = 'output_Q4base.txt';
+inputFileName = 'input_Q8base.txt';
+outputfileName = 'output_Q8base.txt';
 %%%%%%%%%%%%%
 
 %%%%%%%%%%%%%
